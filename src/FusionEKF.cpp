@@ -120,11 +120,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		Initialize state.
 		*/
 		cout << "FusionEKF: Initializing  laser" << endl;
-		ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0.0, 0.0;
+		ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0, 0;
+		cout << "FusionEKF: measurements read" << endl;
 
 		ekf_.R_ << R_laser_;
 		ekf_.H_ << H_laser_;
-		cout << "FusionEKF: Initialized complete" << endl;
+		cout << "FusionEKF: Initialized" << endl;
 	}
 
 		// done initializing, no need to predict or update
