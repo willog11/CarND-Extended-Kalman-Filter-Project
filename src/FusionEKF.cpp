@@ -66,7 +66,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		* Remember: you'll need to convert radar from polar to cartesian coordinates.
 	*/
 	// first measurement
-	cout << "EKF: " << endl;
+	cout << "FusionEKF: " << endl;
 	ekf_.x_ = VectorXd(4);
 	ekf_.x_ << 1, 1, 1, 1;
 
@@ -100,6 +100,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
 		// done initializing, no need to predict or update
 		is_initialized_ = true;
+		cout << "FusionEKF: Initialized" << endl;
 		return;
 	}
 
@@ -123,8 +124,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 	*/
 
 	//set the acceleration noise components
-	float noise_ax = 5;
-	float noise_ay = 5;
+	float noise_ax = 9;
+	float noise_ay = 9;
 
 	//compute the time elapsed between the current and previous measurements
 	float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;	//dt - expressed in seconds
@@ -147,7 +148,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 			dt_3 / 2 * noise_ax, 0, dt_2*noise_ax, 0,
 			0, dt_3 / 2 * noise_ay, 0, dt_2*noise_ay;
 
-
+	cout << "EKF: Prediction state" << endl;
 	ekf_.Predict();
 
 	/*****************************************************************************
