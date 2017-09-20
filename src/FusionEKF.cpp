@@ -103,9 +103,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		// Polar -> cartesian: x = r * cos(angle), y = r * sin(angle)
 		float p1 = rho * cos(phi);
 		float p2 = rho * sin(phi);
-		float v1 = rhodot * cos(phi);
-		float v2 = rhodot * sin(phi);
-		ekf_.x_ << p1, p2, v1, v2;
+		//float v1 = rhodot * cos(phi);
+		//float v2 = rhodot * sin(phi);
+		ekf_.x_ << p1, p2, 0, 0;
 
 		ekf_.R_ << R_radar_;
 		ekf_.H_ << Hj_;
