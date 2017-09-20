@@ -70,6 +70,20 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 	ekf_.x_ = VectorXd(4);
 	ekf_.x_ << 1, 1, 1, 1;
 
+	//state covariance matrix P
+	ekf_.P_ = MatrixXd(4, 4);
+	ekf_.P_ << 1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1000, 0,
+		0, 0, 0, 1000;
+
+	//initial transition matrix
+	ekf_.F_ = MatrixXd(4, 4);
+	ekf_.F_ << 1, 0, 1, 0,
+		0, 1, 0, 1,
+		0, 0, 1, 0,
+		0, 0, 0, 1;
+
 	if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
 		/**
 		Convert radar from polar to cartesian coordinates and initialize state.
@@ -87,6 +101,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
 		ekf_.R_ << R_radar_;
 		ekf_.H_ << Hj_;
+		cout << "FusionEKF: Initialized radar type" << endl;
 	}
 	else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
 		/**
@@ -96,6 +111,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
 		ekf_.R_ << R_laser_;
 		ekf_.H_ << H_laser_;
+		cout << "FusionEKF: Initialized laser type" << endl;
 	}
 
 		// done initializing, no need to predict or update
@@ -103,13 +119,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		cout << "FusionEKF: Initialized" << endl;
 		return;
 	}
-
-	//state covariance matrix P
-	ekf_.P_ = MatrixXd(4, 4);
-	ekf_.P_ << 1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1000, 0,
-		0, 0, 0, 1000;
 
 	/*****************************************************************************
 	*  Prediction
