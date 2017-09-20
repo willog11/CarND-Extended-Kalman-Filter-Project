@@ -98,18 +98,18 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		cout << "FusionEKF: Initializing  radar" << endl;
 		float rho = measurement_pack.raw_measurements_[0]; // Range - radial distance
 		float phi = measurement_pack.raw_measurements_[1]; // Bearing - angel betwee p and x
-		float rhodot = measurement_pack.raw_measurements_[2]; // Radial velocity - rate of change of np
+		//float rhodot = measurement_pack.raw_measurements_[2]; // Radial velocity - rate of change of rho
 
 		cout << "FusionEKF: Radar measurements read" << endl;
 		
 		// Polar -> cartesian: x = r * cos(angle), y = r * sin(angle)
 		float p1 = rho * cos(phi);
 		float p2 = rho * sin(phi);
-		float v1 = rhodot * cos(phi);
-		float v2 = rhodot * sin(phi);
+		//float v1 = rhodot * cos(phi);
+		//float v2 = rhodot * sin(phi);
 
 		cout << "FusionEKF: Updating ekf_x" << endl;
-		ekf_.x_ << p1, p2, v1, v2;
+		ekf_.x_ << p1, p2, 0, 0;
 
 		ekf_.R_ << R_radar_;
 		ekf_.H_ << Hj_;
