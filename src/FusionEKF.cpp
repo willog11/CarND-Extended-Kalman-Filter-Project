@@ -45,6 +45,27 @@ FusionEKF::FusionEKF() {
 	Hj_ << 0, 0, 0, 0,
 		0, 0, 0, 0,
 		0, 0, 0, 0;
+
+	//state covariance matrix P
+	ekf_.P_ = MatrixXd(4, 4);
+	ekf_.P_ << 1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1000, 0,
+		0, 0, 0, 1000;
+
+	//initial transition matrix with dt=0
+	ekf_.F_ = MatrixXd(4, 4);
+	ekf_.F_ << 1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1;
+
+	//inital measurement matrix
+	ekf_.H_ = MatrixXd(4, 4);
+	ekf_.H_ << 1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1;
 }
 
 /**
@@ -69,22 +90,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 	cout << "FusionEKF: " << endl;
 	ekf_.x_ = VectorXd(4);
 	ekf_.x_ << 1, 1, 1, 1;
-
-	cout << "FusionEKF: Setting covariance matrix P" << endl;
-	//state covariance matrix P
-	ekf_.P_ = MatrixXd(4, 4);
-	ekf_.P_ << 1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1000, 0,
-		0, 0, 0, 1000;
-
-	cout << "FusionEKF: Setting initial transition matrix" << endl;
-	//initial transition matrix
-	ekf_.F_ = MatrixXd(4, 4);
-	ekf_.F_ << 1, 0, 1, 0,
-		0, 1, 0, 1,
-		0, 0, 1, 0,
-		0, 0, 0, 1;
 
 	if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
 		/**
@@ -176,7 +181,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
 	if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
 		// Radar updates
-		// Need to add correct logic for Jacobian
 		Tools tool;
 		ekf_.H_ << tool.CalculateJacobian(measurement_pack.raw_measurements_);
 		ekf_.UpdateEKF(measurement_pack.raw_measurements_);
