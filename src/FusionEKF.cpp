@@ -70,6 +70,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 	ekf_.x_ = VectorXd(4);
 	ekf_.x_ << 1, 1, 1, 1;
 
+	cout << "FusionEKF: Setting covariance matrix P" << endl;
 	//state covariance matrix P
 	ekf_.P_ = MatrixXd(4, 4);
 	ekf_.P_ << 1, 0, 0, 0,
@@ -77,6 +78,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		0, 0, 1000, 0,
 		0, 0, 0, 1000;
 
+	cout << "FusionEKF: Setting initial transition matrix" << endl;
 	//initial transition matrix
 	ekf_.F_ = MatrixXd(4, 4);
 	ekf_.F_ << 1, 0, 1, 0,
@@ -88,6 +90,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		/**
 		Convert radar from polar to cartesian coordinates and initialize state.
 		*/
+		cout << "FusionEKF: Initializing  radar" << endl;
 		float rho = measurement_pack.raw_measurements_[0]; // Range - radial distance
 		float phi = measurement_pack.raw_measurements_[1]; // Bearing - angel betwee p and x
 		float rhodot = measurement_pack.raw_measurements_[2]; // Radial velocity - rate of change of np
@@ -101,17 +104,18 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
 		ekf_.R_ << R_radar_;
 		ekf_.H_ << Hj_;
-		cout << "FusionEKF: Initialized radar type" << endl;
+		cout << "FusionEKF: Initialized complete" << endl;
 	}
 	else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
 		/**
 		Initialize state.
 		*/
+		cout << "FusionEKF: Initializing  laser" << endl;
 		ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0.0, 0.0;
 
 		ekf_.R_ << R_laser_;
 		ekf_.H_ << H_laser_;
-		cout << "FusionEKF: Initialized laser type" << endl;
+		cout << "FusionEKF: Initialized complete" << endl;
 	}
 
 		// done initializing, no need to predict or update
