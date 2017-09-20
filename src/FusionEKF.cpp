@@ -41,6 +41,10 @@ FusionEKF::FusionEKF() {
 	H_laser_ << 1, 0, 0, 0,
 				0, 1, 0, 0;
 
+	//measurement matrix - radar - Set to 0's for now
+	Hj_ << 0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0;
 }
 
 /**
@@ -80,18 +84,31 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		float v1 = rhodot * cos(phi);
 		float v2 = rhodot * sin(phi);
 		ekf_.x_ << p1, p2, v1, v2;
+
+		ekf_.R_ << R_radar_;
+		ekf_.H_ << Hj_;
 	}
 	else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
 		/**
 		Initialize state.
 		*/
 		ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0.0, 0.0;
+
+		ekf_.R_ << R_laser_;
+		ekf_.H_ << H_laser_;
 	}
 
 		// done initializing, no need to predict or update
 		is_initialized_ = true;
 		return;
 	}
+
+	//state covariance matrix P
+	ekf_.P_ = MatrixXd(4, 4);
+	ekf_.P_ << 1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1000, 0,
+		0, 0, 0, 1000;
 
 	/*****************************************************************************
 	*  Prediction
@@ -145,10 +162,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
 	if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
 		// Radar updates
-		ekf_.Update(measurement_pack.raw_measurements_);
+		// Need to add correct logic for Jacobian
+		Tools tool;
+		ekf_.H_ << tool.CalculateJacobian(measurement_pack.raw_measurements_);
+		ekf_.UpdateEKF(measurement_pack.raw_measurements_);
 	} else {
 		// Laser updates
-		ekf_.UpdateEKF(measurement_pack.raw_measurements_);
+		ekf_.Update(measurement_pack.raw_measurements_);
 	}
 
 	// print the output

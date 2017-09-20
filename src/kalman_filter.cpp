@@ -1,7 +1,9 @@
 #include "kalman_filter.h"
+#include <iostream>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using namespace std;
 
 KalmanFilter::KalmanFilter() {}
 
@@ -22,6 +24,9 @@ void KalmanFilter::Predict() {
   TODO:
     * predict the state
   */
+	x_ = F_ * x_;
+	MatrixXd Ft = F_.transpose();
+	P_ = F_ * P_ * Ft + Q_;
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
@@ -29,6 +34,19 @@ void KalmanFilter::Update(const VectorXd &z) {
   TODO:
     * update the state by using Kalman Filter equations
   */
+	VectorXd z_pred = H_ * x_;
+	VectorXd y = z - z_pred;
+	MatrixXd Ht = H_.transpose();
+	MatrixXd S = H_ * P_ * Ht + R_;
+	MatrixXd Si = S.inverse();
+	MatrixXd PHt = P_ * Ht;
+	MatrixXd K = PHt * Si;
+
+	//new estimate
+	x_ = x_ + (K * y);
+	long x_size = x_.size();
+	MatrixXd I = MatrixXd::Identity(x_size, x_size);
+	P_ = (I - K * H_) * P_;
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
@@ -36,4 +54,45 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
+	float px = z[0];
+	float py = z[1];
+	float vx = z[2];
+	float vy = z[3];
+
+	float rho = sqrt((px*px) + (py*py));
+	float phi = atan(py / px);
+
+	//check division by zero
+	if (fabs(rho) < 0.0001) {
+		cout << "UpdateEKF () - Error - Division by Zero" << endl;
+		px = 0.0001;
+		py = 0.0001;
+		rho = sqrt((px*px) + (py*py));
+	}
+
+	float rhodot = (px*vx + py*vy) / rho;
+
+	while (phi < -M_PI || phi > M_PI)
+	{
+		phi += 2 * M_PI;
+	}
+
+	MatrixXd hx = MatrixXd(3, 1);
+	hx << rho,
+		phi,
+		rhodot;
+
+	VectorXd y = z - hx;
+
+	MatrixXd Ht = H_.transpose();
+	MatrixXd S = H_ * P_ * Ht + R_;
+	MatrixXd Si = S.inverse();
+	MatrixXd PHt = P_ * Ht;
+	MatrixXd K = PHt * Si;
+
+	//new estimate
+	x_ = x_ + (K * y);
+	long x_size = x_.size();
+	MatrixXd I = MatrixXd::Identity(x_size, x_size);
+	P_ = (I - K * H_) * P_;
 }
