@@ -57,10 +57,10 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     * update the state by using Extended Kalman Filter equations
   */
 	cout << "KalmanFilter::UpdateEKF() - started" << endl;
-	float px = z[0];
-	float py = z[1];
-	float vx = z[2];
-	float vy = z[3];
+	float px = x_[0];
+	float py = x_[1];
+	float vx = x_[2];
+	float vy = x_[3];
 
 	float rho = sqrt((px*px) + (py*py));
 	float phi = atan(py / px);
