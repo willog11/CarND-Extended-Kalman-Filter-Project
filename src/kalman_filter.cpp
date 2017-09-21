@@ -63,9 +63,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	float phi;
 	float rhodot;
 
-	//check division by zero
-	float rhodot = (px*vx + py*vy) / rho;
-
 	if (fabs(px) < 0.0001 || fabs(py) < 0.0001) {
 		if (fabs(px) < 0.0001) {
 			px = 0.0001;
