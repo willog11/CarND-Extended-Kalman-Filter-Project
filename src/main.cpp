@@ -53,7 +53,7 @@ int main()
 
         std::string event = j[0].get<std::string>();
         
-        if (event == "telemetry") {
+        if (event == "telemetry" && sensor_type.compare("L") == 0) {
           // j[1] is the data JSON object
           
           string sensor_measurment = j[1]["sensor_measurement"];
