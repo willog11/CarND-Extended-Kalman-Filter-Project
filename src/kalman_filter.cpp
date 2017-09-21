@@ -79,7 +79,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 		phi += 2 * M_PI;
 	}
 
-	VectorXd hx;
+	VectorXd hx(3);
 	hx << rho, phi,	rhodot;
 	cout << "UpdateEKF () - hx updated" << endl;
 
