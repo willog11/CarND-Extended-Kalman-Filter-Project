@@ -95,12 +95,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		/**
 		Convert radar from polar to cartesian coordinates and initialize state.
 		*/
-		cout << "FusionEKF: Initializing  radar" << endl;
 		float rho = measurement_pack.raw_measurements_[0]; // Range - radial distance
 		float phi = measurement_pack.raw_measurements_[1]; // Bearing - angel betwee p and x
 		//float rhodot = measurement_pack.raw_measurements_[2]; // Radial velocity - rate of change of rho
-
-		cout << "FusionEKF: Radar measurements read" << endl;
 		
 		// Polar -> cartesian: x = r * cos(angle), y = r * sin(angle)
 		float p1 = rho * cos(phi);
@@ -108,22 +105,17 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		//float v1 = rhodot * cos(phi);
 		//float v2 = rhodot * sin(phi);
 
-		cout << "FusionEKF: Updating ekf_x" << endl;
-		ekf_.x_ << p1, p2, 0, 0;
-		cout << "FusionEKF: Initializing  radar complete" << endl;		
+		ekf_.x_ << p1, p2, 0, 0;		
 	}
 	else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
 		/**
 		Initialize state.
 		*/
-		cout << "FusionEKF: Initializing  laser" << endl;
 		ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0, 0;
-		cout << "FusionEKF: Initializing  laser complete" << endl;
 	}
 
 		// done initializing, no need to predict or update
 		is_initialized_ = true;
-		cout << "FusionEKF: Initialized" << endl;
 		return;
 	}
 
@@ -164,7 +156,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 			dt_3 / 2 * noise_ax, 0, dt_2*noise_ax, 0,
 			0, dt_3 / 2 * noise_ay, 0, dt_2*noise_ay;
 
-	cout << "FusionEKF: Prediction state" << endl;
 	ekf_.Predict();
 
 	/*****************************************************************************
@@ -179,19 +170,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
 	if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
 		// Radar updates
-		cout << "FusionEKF: Radar measurement start" << endl;
 		Tools tool;
 		ekf_.R_ = R_radar_;
 		ekf_.H_ = tool.CalculateJacobian(ekf_.x_);
 		ekf_.UpdateEKF(measurement_pack.raw_measurements_);
-		cout << "FusionEKF: Radar measurement update complete" << endl;
 	} else {
 		// Laser updates
-		cout << "FusionEKF: Laser measurement start" << endl;
 		ekf_.R_ = R_laser_;
 		ekf_.H_ = H_laser_;
 		ekf_.Update(measurement_pack.raw_measurements_);
-		cout << "FusionEKF: Radar measurement complete" << endl;
 	}
 
 	// print the output
