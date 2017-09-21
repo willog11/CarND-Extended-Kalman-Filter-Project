@@ -100,12 +100,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		//float rhodot = measurement_pack.raw_measurements_[2]; // Radial velocity - rate of change of rho
 		
 		// Polar -> cartesian: x = r * cos(angle), y = r * sin(angle)
-		float p1 = rho * cos(phi);
-		float p2 = rho * sin(phi);
-		//float v1 = rhodot * cos(phi);
-		//float v2 = rhodot * sin(phi);
+		float px = rho * cos(phi);
+		float py = rho * sin(phi);
+		//float vx = rhodot * cos(phi);
+		//float vy = rhodot * sin(phi);
 
-		ekf_.x_ << p1, p2, 0, 0;		
+		ekf_.x_ << px, py, 0, 0;		
 	}
 	else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
 		/**
@@ -143,11 +143,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 	float dt_3 = dt_2 * dt;
 	float dt_4 = dt_3 * dt;
 
-	//the initial transition matrix F_
-	ekf_.F_ << 1, 0, dt, 0,
-				0, 1, 0, dt,
-				0, 0, 1, 0,
-				0, 0, 0, 1;
+	//Modify the F matrix so that the time is integrated
+	ekf_.F_(0, 2) = dt;
+	ekf_.F_(1, 3) = dt;
 
 	//set the process covariance matrix Q
 	ekf_.Q_ = MatrixXd(4, 4);

@@ -20,20 +20,20 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
 }
 
 void KalmanFilter::Predict() {
-  /**
-  TODO:
-    * predict the state
-  */
+	/**
+	TODO:
+	* predict the state
+	*/
 	x_ = F_ * x_;
 	MatrixXd Ft = F_.transpose();
 	P_ = F_ * P_ * Ft + Q_;
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
-  /**
-  TODO:
-    * update the state by using Kalman Filter equations
-  */
+	/**
+	TODO:
+	* update the state by using Kalman Filter equations
+	*/
 	VectorXd z_pred = H_ * x_;
 	VectorXd y = z - z_pred;
 	MatrixXd Ht = H_.transpose();
@@ -59,30 +59,54 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	float vx = x_[2];
 	float vy = x_[3];
 
-	float rho = sqrt((px*px) + (py*py));
-	float phi = atan2(py, px);
+	float rho;
+	float phi;
+	float rhodot;
 
 	//check division by zero
-	if (fabs(rho) < 0.0001) {
-		cout << "KalmanFilter::UpdateEKF() - Error - Division by Zero" << endl;
-		px = 0.0001;
-		py = 0.0001;
-		rho = sqrt((px*vx) + (py*vy));
-	}
-
 	float rhodot = (px*vx + py*vy) / rho;
 
-	while (phi < -M_PI || phi > M_PI)
-	{
-		phi += 2 * M_PI;
+	if (fabs(px) < 0.0001 || fabs(py) < 0.0001) {
+		if (fabs(px) < 0.0001) {
+			px = 0.0001;
+			cout << "KalmanFilter::UpdateEKF() - Warning - px too small" << endl;
+		}
+
+		if (fabs(py) < 0.0001) {
+			py = 0.0001;
+			cout << "KalmanFilter::UpdateEKF() - Warning - py too small" << endl;
+		}
+
+		rho = sqrt(px*px + py*py);
+		phi = 0;
+		rhodot = 0;
 	}
-	cout << "KalmanFilter::UpdateEKF() - phi ="<< phi << endl;
+	else {
+		rho = sqrt(px*px + py*py);
+		phi = atan2(py, px); //  arc tangent of y/x, in the interval [-pi,+pi] radians.
+		rhodot = (px*vx + py*vy) / rho;
+	}
+
+	// Check and fix upper ceiling
+	bool pi_flag = true;
+	while (pi_flag) {
+		if (phi > M_PI) {
+			phi -= M_PI * 2;
+		}
+		else { pi_flag = false; }
+	}
+	// Check and fix bottom ceiling
+	while (pi_flag) {
+		if (phi < -M_PI) {
+			phi += M_PI * 2;
+		}
+		else { pi_flag = false; }
+	}
 
 	VectorXd hx(3);
 	hx << rho, phi,	rhodot;
 
 	VectorXd y = z - hx;
-
 	MatrixXd Ht = H_.transpose();
 	MatrixXd S = H_ * P_ * Ht + R_;
 	MatrixXd Si = S.inverse();
