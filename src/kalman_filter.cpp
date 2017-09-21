@@ -56,6 +56,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
+	cout << "KalmanFilter::UpdateEKF() - started" << endl;
 	float px = z[0];
 	float py = z[1];
 	float vx = z[2];
@@ -66,7 +67,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
 	//check division by zero
 	if (fabs(rho) < 0.0001) {
-		cout << "UpdateEKF () - Error - Division by Zero" << endl;
+		cout << "KalmanFilter::UpdateEKF() - Error - Division by Zero" << endl;
 		px = 0.0001;
 		py = 0.0001;
 		rho = sqrt((px*px) + (py*py));
@@ -78,10 +79,11 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	{
 		phi += 2 * M_PI;
 	}
+	cout << "KalmanFilter::UpdateEKF() - phi ="<< phi << endl;
 
 	VectorXd hx(3);
 	hx << rho, phi,	rhodot;
-	cout << "UpdateEKF () - hx updated" << endl;
+	cout << "KalmanFilter::UpdateEKF() - hx updated" << endl;
 
 	VectorXd y = z - hx;
 
@@ -96,5 +98,5 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	long x_size = x_.size();
 	MatrixXd I = MatrixXd::Identity(x_size, x_size);
 	P_ = (I - K * H_) * P_;
-	cout << "KalmanFilter: UpdateEKF state complete" << endl;
+	cout << "KalmanFilter::UpdateEKF() state complete" << endl;
 }
