@@ -79,10 +79,9 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 		phi += 2 * M_PI;
 	}
 
-	MatrixXd hx = MatrixXd(3, 1);
-	hx << rho,
-		phi,
-		rhodot;
+	VectorXd hx;
+	hx << rho, phi,	rhodot;
+	cout << "UpdateEKF () - hx updated" << endl;
 
 	VectorXd y = z - hx;
 
