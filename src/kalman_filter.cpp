@@ -84,26 +84,22 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 		rhodot = (px*vx + py*vy) / rho;
 	}
 
-	// Check and fix upper ceiling
-	bool pi_flag = true;
-	while (pi_flag) {
-		if (phi > M_PI) {
-			phi -= M_PI * 2;
-		}
-		else { pi_flag = false; }
-	}
-	// Check and fix bottom ceiling
-	while (pi_flag) {
-		if (phi < -M_PI) {
-			phi += M_PI * 2;
-		}
-		else { pi_flag = false; }
-	}
+	// Check phi values to ensure its in range
+	//if (phi > M_PI) phi -= 2 * M_PI;
+	//if (phi < -M_PI) phi += 2 * M_PI;
 
 	VectorXd hx(3);
 	hx << rho, phi,	rhodot;
 
 	VectorXd y = z - hx;
+	// Check the resulting range of phi
+	while (y(1) > M_PI) {
+		y(1) -= 2 * M_PI;
+	}
+	while (y(1) < -M_PI) {
+		y(1) += 2 * M_PI;
+	}
+
 	MatrixXd Ht = H_.transpose();
 	MatrixXd S = H_ * P_ * Ht + R_;
 	MatrixXd Si = S.inverse();
