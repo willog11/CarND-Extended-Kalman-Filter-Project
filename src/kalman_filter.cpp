@@ -84,10 +84,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 		rhodot = (px*vx + py*vy) / rho;
 	}
 
-	// Check phi values to ensure its in range
-	//if (phi > M_PI) phi -= 2 * M_PI;
-	//if (phi < -M_PI) phi += 2 * M_PI;
-
 	VectorXd hx(3);
 	hx << rho, phi,	rhodot;
 
